@@ -1,0 +1,10 @@
+streamlit
+pandas
+numpy
+requests
+pymongo
+google-generativeai
+python-dotenv
+opencv-python
+pillow
+groq
