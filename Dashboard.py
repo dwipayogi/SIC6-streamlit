@@ -22,7 +22,7 @@ def fetch_latest_data():
 # Fungsi untuk mengambil data historis (10 data terbaru)
 def fetch_historical_data():
     try:
-        response = requests.get("https://samsung.yogserver.web.id/data")
+        response = requests.get("https://samsung.yogserver.web.id/data/sensor")
         if response.status_code == 200:
             data = response.json()
             # Ambil 10 data terbaru
@@ -98,22 +98,3 @@ st.line_chart(temp_df, x='Waktu', y='Suhu', use_container_width=True)
 st.subheader("Data Kelembaban")
 st.write("Grafik berikut menampilkan 10 data kelembaban terbaru.")
 st.line_chart(humidity_df, x='Waktu', y='Kelembaban', use_container_width=True)
-
-# Catatan: Fungsi generate_temperature_data dan generate_humidity_data digunakan sebagai cadangan
-def generate_temperature_data(num_points=10):
-    timestamps = pd.date_range(end=pd.Timestamp.now(), periods=num_points, freq='1s')
-    base_temp = 30
-    temperatures = base_temp + np.random.normal(0, 1, size=num_points)
-    return pd.DataFrame({
-        'Waktu': timestamps,
-        'Suhu': temperatures
-    })
-
-def generate_humidity_data(num_points=10):
-    timestamps = pd.date_range(end=pd.Timestamp.now(), periods=num_points, freq='1s')
-    base_humidity = 50
-    humidity = base_humidity + np.random.normal(0, 5, size=num_points)
-    return pd.DataFrame({
-        'Waktu': timestamps,
-        'Kelembaban': humidity
-    })

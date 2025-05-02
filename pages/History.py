@@ -1,63 +1,97 @@
 import streamlit as st
 import requests
 import pandas as pd
-import json
-import time
+from datetime import datetime
 
 st.set_page_config(page_title="EduDetect - Riwayat Data", layout="wide")
 
-# Sidebar
-st.sidebar.header("Riwayat Data")
-st.sidebar.write("Halaman ini menampilkan data historis.")
-
 # Konten utama
-st.title("Riwayat Data")
-st.subheader("Data Historis")
-st.write("Bagian ini menampilkan data historis yang telah terekam.")
+st.title("EduDetect - Riwayat Data")
 
-placeholder = st.empty()
+# Area filter di bagian atas
+with st.container():
+    st.markdown("### Filter Data")
+    
+    # Layout untuk filter dan refresh button
+    col1, col2, col3 = st.columns([2, 2, 1])
+    
+    with col1:
+        # Date picker untuk memilih hari
+        today = datetime.now().date()
+        selected_date = st.date_input("Pilih Tanggal", today)
+
+# Placeholder untuk data
+placeholder_sensor = st.empty()
+placeholder_streamlit = st.empty()
 
 # Fungsi untuk mengambil data dari server
 @st.cache_data(ttl=300)  # Cache data selama 5 menit
-def fetch_data():
+def fetch_data_sensor():
     try:
-        response = requests.get("https://samsung.yogserver.web.id/data")
+        response = requests.get("https://samsung.yogserver.web.id/data/sensor")
         if response.status_code == 200:
             return response.json()
         else:
-            st.error(f"Terjadi kesalahan saat mengambil data: {response.status_code}")
+            st.error(f"Terjadi kesalahan saat mengambil data sensor: {response.status_code}")
             return None
     except Exception as e:
-        st.error(f"Terjadi kesalahan: {e}")
+        st.error(f"Terjadi kesalahan saat mengambil data sensor: {e}")
+        return None
+    
+@st.cache_data(ttl=300)  # Cache data selama 5 menit
+def fetch_data_streamlit():
+    try:
+        response = requests.get("https://samsung.yogserver.web.id/data/streamlit")
+        if response.status_code == 200:
+            return response.json()
+        else:
+            st.error(f"Terjadi kesalahan saat mengambil data streamlit: {response.status_code}")
+            return None
+    except Exception as e:
+        st.error(f"Terjadi kesalahan saat mengambil data streamlit: {e}")
         return None
 
-# Kontainer untuk menampilkan waktu refresh terakhir
-refresh_info = st.container()
-last_refresh = st.empty()
+# Garis pemisah
+st.markdown("---")
 
-# Tombol refresh
-col1, col2 = st.columns([1, 5])
-with col1:
-    if st.button("Muat Ulang Data"):
-        # Hapus cache untuk mengambil data terbaru
-        fetch_data.clear()
-        # Perbarui waktu refresh terakhir
-        current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-        last_refresh.text(f"Terakhir dimuat ulang: {current_time}")
+# Fungsi untuk menampilkan dataframe dengan pemfilteran tanggal
+def display_filtered_data(df, data_name):
+    # Konversi kolom timestamp ke format datetime jika ada
+    if 'timestamp' in df.columns:
+        df['timestamp'] = pd.to_datetime(df['timestamp'])
+        
+        # Filter data berdasarkan tanggal yang dipilih
+        selected_date_str = selected_date.strftime('%Y-%m-%d')
+        filtered_df = df[df['timestamp'].dt.strftime('%Y-%m-%d') == selected_date_str]
+        
+        st.subheader(f"{data_name}")
+        if len(filtered_df) > 0:
+            st.dataframe(filtered_df, use_container_width=True)
+            st.caption(f"Menampilkan {len(filtered_df)} {data_name.lower()} pada tanggal {selected_date_str}")
+        else:
+            st.warning(f"Tidak ada {data_name.lower()} tersedia untuk tanggal {selected_date_str}")
+    else:
+        st.subheader(f"{data_name}")
+        st.dataframe(df, use_container_width=True)
+        st.caption(f"Kolom timestamp tidak ditemukan dalam {data_name.lower()}. Menampilkan semua data.")
 
-# Ambil dan tampilkan data
-data = fetch_data()
-
-if data:
-    # Tampilkan data pada placeholder
-    with placeholder.container():
-        df = pd.DataFrame(data)
-        st.dataframe(df)
+# Tampilkan Data Sensor
+data_sensor = fetch_data_sensor()
+if data_sensor:
+    df_sensor = pd.DataFrame(data_sensor)
+    display_filtered_data(df_sensor, "Riwayat Data Sensor IoT")
 else:
-    with placeholder.container():
-        st.warning("Data tidak tersedia. Silakan periksa koneksi server.")
+    st.subheader("Riwayat Data Sensor ioT")
+    st.warning("Data sensor tidak tersedia. Silakan periksa koneksi server.")
 
-# Dokumentasi:
-# - Seluruh tampilan aplikasi telah diterjemahkan ke Bahasa Indonesia.
-# - Komentar kode juga menggunakan Bahasa Indonesia untuk memudahkan pengembangan.
-# - Fungsi utama: menampilkan data historis dari server.
+# Garis pemisah
+st.markdown("---")
+
+# Tampilkan Data Streamlit
+data_streamlit = fetch_data_streamlit()
+if data_streamlit:
+    df_streamlit = pd.DataFrame(data_streamlit)
+    display_filtered_data(df_streamlit, "Riwayat Data Deteksi Siswa")
+else:
+    st.subheader("Riwayat Data Deteksi Siswa")
+    st.warning("Data streamlit tidak tersedia. Silakan periksa koneksi server.")

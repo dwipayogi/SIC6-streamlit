@@ -11,7 +11,7 @@ st.set_page_config(page_title="EduDetect - Chatbot", layout="wide")
 
 # Sidebar Chatbot
 st.sidebar.header("Chatbot")
-st.sidebar.write("Chatbot AI EduDetect")
+st.sidebar.write("Chatbot AI EduDetect digunaakan untuk menjawab pertanyaan terkait sistem monitoring.")
 
 # Judul utama halaman
 st.title("Chatbot AI")

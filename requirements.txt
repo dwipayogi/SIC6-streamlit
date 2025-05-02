@@ -8,3 +8,5 @@ python-dotenv
 opencv-python
 pillow
 groq
+ultralytics
+plotly
