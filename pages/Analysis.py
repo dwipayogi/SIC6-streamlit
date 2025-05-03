@@ -9,7 +9,9 @@ st.title("Analisis Data oleh AI")
 st.sidebar.header("Analisis Data")
 st.sidebar.write("EduDetect melakukan analisis data menggunakan AI untuk memberikan wawasan yang lebih dalam.")
 
-if st.button("Lakukan Analisis"):
+if 'analysis_result' not in st.session_state:
     with st.spinner("Mengambil dan menganalisis data..."):
-        analysis = analyze_data()
-        st.success(analysis)
+        st.session_state['analysis_result'] = analyze_data()
+
+analysis = st.session_state['analysis_result']
+st.success(analysis)
