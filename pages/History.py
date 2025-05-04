@@ -5,6 +5,10 @@ from datetime import datetime
 
 st.set_page_config(page_title="EduDetect - Riwayat Data", layout="wide")
 
+# Sidebar History
+st.sidebar.header("History")
+st.sidebar.write("Halaman ini menampilkan riwayat data sensor dan deteksi siswa.")
+
 # Konten utama
 st.title("EduDetect - Riwayat Data")
 
